@@ -1,0 +1,12 @@
+node_modules/
+vendor/
+.env
+.env.backup
+.env.production
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store
+task.md
+OVERVIEW.md
+CODING_GUIDELINES.md
