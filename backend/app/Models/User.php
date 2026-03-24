@@ -44,4 +44,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function servers()
+    {
+        return $this->hasMany(\App\Models\Server\Server::class);
+    }
 }
