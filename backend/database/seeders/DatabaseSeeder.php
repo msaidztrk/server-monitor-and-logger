@@ -13,11 +13,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $user = User::factory()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => bcrypt('password'),
         ]);
+
+        \App\Models\Server\Server::factory(5)
+            ->for($user)
+            ->has(\App\Models\Server\ServerMetric::factory()->count(10), 'metrics')
+            ->has(\App\Models\Server\ServerLog::factory()->count(10), 'logs')
+            ->create();
     }
 }
