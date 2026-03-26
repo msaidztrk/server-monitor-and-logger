@@ -4,16 +4,12 @@ namespace App\Http\Controllers\Server;
 
 use App\DTOs\Server\ServerMetricDTO;
 use App\Http\Controllers\Controller;
-use App\Services\Server\ServerServiceInterface;
+use App\Jobs\Server\StoreServerMetricJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class MetricController extends Controller
 {
-    public function __construct(
-        private ServerServiceInterface $serverService
-    ) {}
-
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -23,8 +19,8 @@ final class MetricController extends Controller
         ]);
 
         $metricData = ServerMetricDTO::fromRequest($request);
-        $this->serverService->recordServerMetrics($metricData);
+        StoreServerMetricJob::dispatch($metricData);
 
-        return response()->json(['status' => 'Metric recorded'], 201);
+        return response()->json(['status' => 'Metric accepted'], 202);
     }
 }

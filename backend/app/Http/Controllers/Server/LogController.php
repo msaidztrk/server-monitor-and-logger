@@ -4,16 +4,12 @@ namespace App\Http\Controllers\Server;
 
 use App\DTOs\Server\ServerLogDTO;
 use App\Http\Controllers\Controller;
-use App\Services\Server\ServerServiceInterface;
+use App\Jobs\Server\StoreServerLogJob;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 final class LogController extends Controller
 {
-    public function __construct(
-        private ServerServiceInterface $serverService
-    ) {}
-
     public function store(Request $request): JsonResponse
     {
         $request->validate([
@@ -22,8 +18,8 @@ final class LogController extends Controller
         ]);
 
         $logData = ServerLogDTO::fromRequest($request);
-        $this->serverService->recordServerLog($logData);
+        StoreServerLogJob::dispatch($logData);
 
-        return response()->json(['status' => 'Log recorded'], 201);
+        return response()->json(['status' => 'Log accepted'], 202);
     }
 }
