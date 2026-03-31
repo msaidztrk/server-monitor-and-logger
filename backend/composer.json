@@ -8,6 +8,7 @@
         "php": "^8.2",
         "laravel/framework": "^11.0",
         "laravel/passport": "^13.0",
+        "laravel/reverb": "^1.9",
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
