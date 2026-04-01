@@ -5,6 +5,7 @@ namespace App\Services\Server;
 use App\DTOs\Server\ServerLogDTO;
 use App\DTOs\Server\ServerMetricDTO;
 use App\DTOs\Server\ServerRegistrationDTO;
+use App\Events\Server\ServerMetricUpdated;
 use App\Repositories\Server\ServerRepositoryInterface;
 
 interface ServerServiceInterface
@@ -12,6 +13,7 @@ interface ServerServiceInterface
     public function registerServer(ServerRegistrationDTO $dto): array;
     public function recordServerMetrics(ServerMetricDTO $dto): void;
     public function recordServerLog(ServerLogDTO $dto): void;
+    public function cleanupMetrics(int $retentionDays): int;
 }
 
 final class ServerService implements ServerServiceInterface
@@ -33,11 +35,17 @@ final class ServerService implements ServerServiceInterface
 
     public function recordServerMetrics(ServerMetricDTO $dto): void
     {
-        $this->serverRepository->recordMetric($dto);
+        $metricRecord = $this->serverRepository->recordMetric($dto);
+        event(new ServerMetricUpdated($metricRecord));
     }
 
     public function recordServerLog(ServerLogDTO $dto): void
     {
         $this->serverRepository->recordLog($dto);
+    }
+
+    public function cleanupMetrics(int $retentionDays): int
+    {
+        return $this->serverRepository->pruneMetrics($retentionDays);
     }
 }
