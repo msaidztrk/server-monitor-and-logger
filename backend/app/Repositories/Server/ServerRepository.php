@@ -6,6 +6,7 @@ use App\DTOs\Server\ServerLogDTO;
 use App\DTOs\Server\ServerMetricDTO;
 use App\DTOs\Server\ServerRegistrationDTO;
 use App\Models\Server\Server;
+use App\Models\Server\ServerLog;
 use App\Models\Server\ServerMetric;
 
 interface ServerRepositoryInterface
@@ -14,6 +15,7 @@ interface ServerRepositoryInterface
     public function recordMetric(ServerMetricDTO $metricData): ServerMetric;
     public function recordLog(ServerLogDTO $logData): void;
     public function pruneMetrics(int $retentionDays): int;
+    public function pruneLogs(int $retentionDays): int;
     public function getAllForUser(int $userId);
     public function getMetricsForServer(int $serverId, int $hours = 24);
     public function getLogsForServer(int $serverId, int $limit = 100);
@@ -60,6 +62,11 @@ final class EloquentServerRepository implements ServerRepositoryInterface
     public function pruneMetrics(int $retentionDays): int
     {
         return ServerMetric::where('created_at', '<', now()->subDays($retentionDays))->delete();
+    }
+
+    public function pruneLogs(int $retentionDays): int
+    {
+        return ServerLog::where('created_at', '<', now()->subDays($retentionDays))->delete();
     }
 
     public function getAllForUser(int $userId)

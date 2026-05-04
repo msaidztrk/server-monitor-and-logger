@@ -20,7 +20,7 @@ final class ServerResource extends JsonResource
             'ip_address' => $this->ip_address,
             'status' => $this->status,
             'last_seen_at' => $this->last_seen_at?->toDateTimeString(),
-            'is_online' => $this->last_seen_at?->diffInMinutes() < 5,
+            'is_online' => $this->last_seen_at && $this->last_seen_at->diffInMinutes() < 2,
             'created_at' => $this->created_at->toDateTimeString(),
         ];
     }

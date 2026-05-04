@@ -14,6 +14,7 @@ interface ServerServiceInterface
     public function recordServerMetrics(ServerMetricDTO $dto): void;
     public function recordServerLog(ServerLogDTO $dto): void;
     public function cleanupMetrics(int $retentionDays): int;
+    public function cleanupLogs(int $retentionDays): int;
     public function getServersForUser(int $userId);
     public function getServerMetrics(int $serverId, int $hours = 24);
     public function getServerLogs(int $serverId, int $limit = 100);
@@ -50,6 +51,11 @@ final class ServerService implements ServerServiceInterface
     public function cleanupMetrics(int $retentionDays): int
     {
         return $this->serverRepository->pruneMetrics($retentionDays);
+    }
+
+    public function cleanupLogs(int $retentionDays): int
+    {
+        return $this->serverRepository->pruneLogs($retentionDays);
     }
 
     public function getServersForUser(int $userId)
