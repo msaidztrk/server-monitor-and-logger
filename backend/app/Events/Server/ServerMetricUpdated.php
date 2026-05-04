@@ -15,7 +15,8 @@ final class ServerMetricUpdated implements ShouldBroadcastNow
 
     public function __construct(
         public readonly ServerMetric $serverMetric
-    ) {}
+    ) {
+    }
 
     public function broadcastOn(): array
     {

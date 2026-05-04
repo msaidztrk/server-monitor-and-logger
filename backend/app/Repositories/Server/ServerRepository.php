@@ -14,6 +14,10 @@ interface ServerRepositoryInterface
     public function recordMetric(ServerMetricDTO $metricData): ServerMetric;
     public function recordLog(ServerLogDTO $logData): void;
     public function pruneMetrics(int $retentionDays): int;
+    public function getAllForUser(int $userId);
+    public function getMetricsForServer(int $serverId, int $hours = 24);
+    public function getLogsForServer(int $serverId, int $limit = 100);
+    public function updateLastSeen(int $serverId): void;
 }
 
 final class EloquentServerRepository implements ServerRepositoryInterface
@@ -30,7 +34,10 @@ final class EloquentServerRepository implements ServerRepositoryInterface
 
     public function recordMetric(ServerMetricDTO $metricData): ServerMetric
     {
-        return Server::findOrFail($metricData->serverId)->metrics()->create([
+        $server = Server::findOrFail($metricData->serverId);
+        $this->updateLastSeen($server->id);
+
+        return $server->metrics()->create([
             'cpu_usage' => $metricData->cpuUsage,
             'ram_usage' => $metricData->ramUsage,
             'disk_usage' => $metricData->diskUsage,
@@ -40,7 +47,10 @@ final class EloquentServerRepository implements ServerRepositoryInterface
 
     public function recordLog(ServerLogDTO $logData): void
     {
-        Server::findOrFail($logData->serverId)->logs()->create([
+        $server = Server::findOrFail($logData->serverId);
+        $this->updateLastSeen($server->id);
+
+        $server->logs()->create([
             'level' => $logData->level,
             'message' => $logData->message,
             'created_at' => now(),
@@ -51,4 +61,36 @@ final class EloquentServerRepository implements ServerRepositoryInterface
     {
         return ServerMetric::where('created_at', '<', now()->subDays($retentionDays))->delete();
     }
+
+    public function getAllForUser(int $userId)
+    {
+        return Server::where('user_id', $userId)->get();
+    }
+
+    public function getMetricsForServer(int $serverId, int $hours = 24)
+    {
+        return Server::findOrFail($serverId)
+            ->metrics()
+            ->where('created_at', '>=', now()->subHours($hours))
+            ->orderBy('created_at', 'asc')
+            ->get();
+    }
+
+    public function getLogsForServer(int $serverId, int $limit = 100)
+    {
+        return Server::findOrFail($serverId)
+            ->logs()
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
+    public function updateLastSeen(int $serverId): void
+    {
+        Server::where('id', $serverId)->update([
+            'last_seen_at' => now(),
+            'status' => 'online'
+        ]);
+    }
 }
+
