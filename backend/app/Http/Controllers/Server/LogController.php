@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Server;
 
 use App\DTOs\Server\ServerLogDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Server\StoreLogRequest;
 use App\Http\Resources\Server\LogResource;
 use App\Jobs\Server\StoreServerLogJob;
 use App\Models\Server\Server;
@@ -24,13 +25,8 @@ final class LogController extends Controller
         return response()->json(LogResource::collection($logs));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreLogRequest $request): JsonResponse
     {
-        $request->validate([
-            'level' => 'required|string|in:debug,info,warning,error,critical',
-            'message' => 'required|string',
-        ]);
-
         $logData = ServerLogDTO::fromRequest($request);
         StoreServerLogJob::dispatch($logData);
 

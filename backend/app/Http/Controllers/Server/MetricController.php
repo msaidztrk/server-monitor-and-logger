@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Server;
 
 use App\DTOs\Server\ServerMetricDTO;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Server\StoreMetricRequest;
 use App\Http\Resources\Server\MetricResource;
 use App\Jobs\Server\StoreServerMetricJob;
 use App\Models\Server\Server;
@@ -24,14 +25,8 @@ final class MetricController extends Controller
         return response()->json(MetricResource::collection($metrics));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreMetricRequest $request): JsonResponse
     {
-        $request->validate([
-            'cpu_usage' => 'required|numeric|min:0|max:100',
-            'ram_usage' => 'required|numeric|min:0|max:100',
-            'disk_usage' => 'required|numeric|min:0|max:100',
-        ]);
-
         $metricData = ServerMetricDTO::fromRequest($request);
         StoreServerMetricJob::dispatch($metricData);
 
