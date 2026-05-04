@@ -11,10 +11,17 @@ Route::middleware('auth:api')->group(function () {
         return $request->user();
     });
 
+    Route::get('/servers', [ServerController::class, 'index']);
     Route::post('/servers', [ServerController::class, 'store']);
+
+    Route::middleware('server.owner')->group(function () {
+        Route::get('/servers/{server}/metrics', [MetricController::class, 'index']);
+        Route::get('/servers/{server}/logs', [LogController::class, 'index']);
+    });
 });
 
 Route::middleware('auth:server-api')->group(function () {
     Route::post('/metrics', [MetricController::class, 'store']);
     Route::post('/logs', [LogController::class, 'store']);
 });
+
